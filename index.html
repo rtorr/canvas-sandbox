@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas Sandbox</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <script>
+      const beginningOfTime = Date.now();
+      const canvas = document.getElementById("canvas");
+      ctx = canvas.getContext("2d");
+      ctx.canvas.width = window.innerWidth;
+      ctx.canvas.height = window.innerHeight;
+
+      let _duration = 1000;
+      let startTime;
+      let startX = 25;
+      let endX = 100;
+
+      ctx.globalCompositeOperation = "destination-over";
+
+      const circle = new Path2D();
+
+      circle.arc(startX, 50, 25, 0, 2 * Math.PI);
+      ctx.fill(circle);
+
+      drawCircle(ctx, startX, 50, 25);
+
+      function animate(time, durration, start, end, easing) {
+        let elapsed = (time - 0) / durration;
+        elapsed = durration === 0 || elapsed > 1 ? 1 : elapsed;
+        let value = easing ? easing(elapsed) : elapsed;
+        return start + (end - start) * value;
+      }
+
+      function quadraticOut(a) {
+        return a * (2 - a);
+      }
+
+      function drawCircle(ctx, x, y, size) {
+        const circle = new Path2D();
+        circle.arc(x, y, size, 0, 2 * Math.PI);
+        ctx.fill(circle);
+      }
+
+      function start(timestamp) {
+        if (startTime === undefined) {
+          startTime = timestamp;
+        }
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        const elapsed = timestamp - startTime;
+        const x = animate(
+          elapsed,
+          _duration,
+          startX,
+          window.innerWidth - 25,
+          quadraticOut
+        );
+
+        drawCircle(ctx, x, 50, 25);
+
+        if (elapsed < _duration) {
+          window.requestAnimationFrame(start);
+        }
+      }
+
+      canvas.addEventListener("click", () => {
+        startTime = Date.now() - beginningOfTime;
+        start(startTime);
+      });
+    </script>
+  </body>
+</html>
